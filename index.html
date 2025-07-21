@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Absensi Eskul</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #d0eaff, #ffffff);
+      color: #003366;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 700px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    input, select, button {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    input, select {
+      flex: 1;
+    }
+    button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .list {
+      margin-top: 20px;
+      display: grid;
+      gap: 10px;
+    }
+    .card {
+      background: white;
+      border-left: 6px solid;
+      border-radius: 5px;
+      padding: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .hadir { border-color: green; }
+    .izin { border-color: orange; }
+    .alpha { border-color: red; }
+    .sakit { border-color: blue; }
+    .hidden-summary {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Absensi Ekstrakurikuler</h1>
+    <div class="form">
+      <input type="text" id="name" placeholder="Nama siswa">
+      <input type="text" id="kelas" placeholder="Kelas">
+      <select id="status">
+        <option value="hadir">Hadir</option>
+        <option value="izin">Izin</option>
+        <option value="alpha">Alpha</option>
+        <option value="sakit">Sakit</option>
+      </select>
+      <button onclick="addEntry()">Tambah</button>
+      <button onclick="requestPassword()">Lihat Ringkasan</button>
+    </div>
+    <div class="list" id="list"></div>
+
+    <!-- Ringkasan tersembunyi -->
+    <div id="summary" class="hidden-summary">
+      <h2>Data Ringkasan (Admin Only)</h2>
+      <pre id="summaryData"></pre>
+    </div>
+  </div>
+
+  <script>
+    const studentData = {};
+    const ADMIN_PASSWORD = "admin123"; // Ganti sesuai keinginan
+
+    function addEntry() {
+      const name = document.getElementById('name').value.trim();
+      const kelas = document.getElementById('kelas').value.trim();
+      const status = document.getElementById('status').value;
+      if (!name || !kelas) return;
+
+      const key = name.toLowerCase();
+      if (!studentData[key]) {
+        studentData[key] = { name, kelas, hadir: 0, izin: 0, alpha: 0, sakit: 0 };
+      }
+      studentData[key][status]++;
+
+      const card = document.createElement('div');
+      card.className = `card ${status}`;
+      card.innerHTML = `
+        <span><strong>Nama:</strong> ${name}</span>
+        <span><strong>Kelas:</strong> ${kelas}</span>
+        <span><strong>Status:</strong> ${status.charAt(0).toUpperCase() + status.slice(1)}</span>
+      `;
+      document.getElementById('list').appendChild(card);
+
+      document.getElementById('name').value = '';
+      document.getElementById('kelas').value = '';
+      document.getElementById('status').value = 'hadir';
+
+      updateHiddenSummary();
+    }
+
+    function updateHiddenSummary() {
+      let text = '';
+      for (const key in studentData) {
+        const s = studentData[key];
+        text += `${s.name} (${s.kelas}) - Hadir: ${s.hadir}, Izin: ${s.izin}, Alpha: ${s.alpha}, Sakit: ${s.sakit}\n`;
+      }
+      document.getElementById('summaryData').textContent = text;
+    }
+
+    function requestPassword() {
+      const input = prompt("Masukkan password admin:");
+      if (input === ADMIN_PASSWORD) {
+        toggleSummary();
+      } else {
+        alert("Password salah.");
+      }
+    }
+
+    function toggleSummary() {
+      const summary = document.getElementById('summary');
+      summary.classList.toggle('hidden-summary');
+    }
+  </script>
+</body>
+</html>
